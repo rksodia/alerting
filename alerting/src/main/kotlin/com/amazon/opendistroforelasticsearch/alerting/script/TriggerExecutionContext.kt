@@ -20,6 +20,8 @@ import com.amazon.opendistroforelasticsearch.alerting.model.Monitor
 import com.amazon.opendistroforelasticsearch.alerting.model.MonitorRunResult
 import com.amazon.opendistroforelasticsearch.alerting.model.Trigger
 import java.time.Instant
+import java.time.ZoneId
+import java.time.ZoneOffset
 
 data class TriggerExecutionContext(
     val monitor: Monitor,
@@ -32,8 +34,10 @@ data class TriggerExecutionContext(
 ) {
 
     constructor(monitor: Monitor, trigger: Trigger, monitorRunResult: MonitorRunResult, alert: Alert? = null):
-            this(monitor, trigger, monitorRunResult.inputResults.results, monitorRunResult.periodStart,
-            monitorRunResult.periodEnd, alert, monitorRunResult.scriptContextError(trigger))
+            this(monitor, trigger, monitorRunResult.inputResults.results,
+                monitorRunResult.periodStart.atZone(ZoneId.systemDefault()).toLocalDateTime().toInstant(ZoneOffset.UTC),
+                monitorRunResult.periodEnd.atZone(ZoneId.systemDefault()).toLocalDateTime().toInstant(ZoneOffset.UTC),
+                alert, monitorRunResult.scriptContextError(trigger))
 
     /**
      * Mustache templates need special permissions to reflectively introspect field names. To avoid doing this we
